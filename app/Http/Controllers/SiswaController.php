@@ -8,23 +8,20 @@ use Illuminate\Http\Request;
 class SiswaController extends Controller
 {
     public function index(Request $request)
-{
-    $search = $request->query('search');
+    {
+        $search = $request->input('search');
 
-    $siswas = Siswa::when($search, function ($query, $search) {
-            return $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', '%' . $search . '%')
-                  ->orWhere('nis', 'like', '%' . $search . '%')
-                  ->orWhere('kelas', 'like', '%' . $search . '%')
-                  ->orWhere('alamat', 'like', '%' . $search . '%');
-            });
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(5);
+        $siswa = Siswa::query()
+            ->when($search, function ($query) use ($search) {
+                return $query->where('nama', 'like', "%" . $search . "%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5);
 
-    return view('siswa.index', compact('siswas'));
-}
+        $siswa->appends(['search' => $search]);
 
+        return view('siswa.index', compact('siswa'));
+    }
 
     public function create()
     {
